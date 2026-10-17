@@ -2,6 +2,12 @@
 
 A homage to Sanzo Wada: a phone-first website for browsing the 348 color combinations in Sanzo Wada's *A Dictionary of Color Combinations*. You can copy any color as HEX, RGB or CMYK and save favorites. It installs to the home screen and works offline.
 
+The share button on a combination or color opens a sheet with:
+
+- a 1080 × 1920 story card and a wallpaper sized to your screen, both PNGs (shared through the system share sheet on phones and tablets, downloaded on computers)
+- CSS custom properties and a Tailwind v4 `@theme` block to copy
+- Procreate `.swatches` and Adobe `.ase` files to download
+
 Plain HTML, CSS and JavaScript with no build step. Any static host works (GitHub Pages, Netlify, Cloudflare Pages).
 
 ## Run locally
@@ -18,7 +24,8 @@ Then open http://localhost:5173. Use a server rather than opening `index.html` d
 | --- | --- |
 | `index.html` | Page shell, tab bar, font and PWA tags |
 | `styles.css` | All styles; phone-first with breakpoints at 600px and 860px |
-| `app.js` | Data loading, hash router, views, copy/save/share, swipe |
+| `app.js` | Data loading, hash router, views, copy/save/share, the share sheet, swipe |
+| `export.js` | CSS and Tailwind snippets, `.swatches` (store-only zip) and `.ase` writers, story card and wallpaper drawing |
 | `data/colors.json` | 159 colors, each listing the combinations it belongs to |
 | `sw.js` | Offline cache. Bump `VERSION` when you add or rename app files |
 | `manifest.webmanifest`, `icons/` | Install metadata and icons |

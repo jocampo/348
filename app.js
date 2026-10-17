@@ -1,5 +1,7 @@
 // 348: a homage to Sanzo Wada. Browse, copy and save his color combinations.
 
+import { CARD, adobeSwatches, cssVariables, drawCard, drawWallpaper, procreateSwatches, tailwindTheme, toPng, wallpaperSize } from './export.js';
+
 const CHAPTERS = ['Reds & pinks', 'Yellows, oranges & browns', 'Greens', 'Blues', 'Violets & purples', 'Neutrals'];
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
 const COUNT_WORDS = { 2: 'Two', 3: 'Three', 4: 'Four' };
@@ -20,11 +22,21 @@ const icon = {
   copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5v-2a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg>',
   shuffle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7h3.2c2 0 3.2 1 4.3 2.7l2 3.1c1.1 1.7 2.3 2.7 4.3 2.7h3.2M17.5 12.5l3 3-3 3"/><path d="M3.5 17h3.2c1.2 0 2.1-.4 2.9-1.1M14.4 8.1c.8-.7 1.7-1.1 2.9-1.1h3.2M17.5 4l3 3-3 3"/></svg>',
   search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>',
+  close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>',
+  link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5a3.5 3.5 0 0 0 5 0l3-3a3.5 3.5 0 0 0-5-5l-1 1"/><path d="M13.5 10.5a3.5 3.5 0 0 0-5 0l-3 3a3.5 3.5 0 0 0 5 5l1-1"/></svg>',
+  download: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19.5h14"/></svg>',
+  code: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 7-5 5 5 5M15.5 7l5 5-5 5"/></svg>',
+  braces: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4.5c-1.8 0-2.5.8-2.5 2.5v2.5c0 1.3-.7 2-2 2.5 1.3.5 2 1.2 2 2.5V17c0 1.7.7 2.5 2.5 2.5M15 4.5c1.8 0 2.5.8 2.5 2.5v2.5c0 1.3.7 2 2 2.5-1.3.5-2 1.2-2 2.5V17c0 1.7-.7 2.5-2.5 2.5"/></svg>',
+  brush: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4 11.5 12.5"/><path d="M11.5 12.5c-1.6-1.1-4-.6-4.7 1.5-.5 1.6-.9 3.6-2.8 4.6 2.7.9 5.9.5 7.4-1.3 1.1-1.3 1.2-3.5.1-4.8z"/></svg>',
+  swatch: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="3.5" width="6.5" height="17" rx="1.5"/><path d="M11 8.2 14.2 5a1.5 1.5 0 0 1 2.1 0l2.7 2.7a1.5 1.5 0 0 1 0 2.1L11 17.8"/><circle cx="7.75" cy="16.5" r=".6"/></svg>',
 };
 
 const main = document.getElementById('main');
 const toastEl = document.querySelector('.toast');
+const sheet = document.getElementById('sheet');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+// Phones and tablets get the system share sheet for files; computers get a plain download.
+const touchFirst = matchMedia('(pointer: coarse)');
 
 const data = { colors: [], combos: [], comboById: new Map(), colorBySlug: new Map() };
 const store = loadStore();
@@ -145,7 +157,7 @@ function detailBar({ back, title, sub, saveKey, saveLabel }) {
     <a class="icon-btn" href="${back}" data-back aria-label="Back">${icon.back}</a>
     <div class="detail-title"><span class="detail-main">${title}</span>${sub ? `<span class="detail-sub">${sub}</span>` : ''}</div>
     <button class="icon-btn" type="button" data-save="${saveKey}" aria-pressed="${saved}" aria-label="Save ${saveLabel}">${icon.bookmark}</button>
-    <button class="icon-btn" type="button" data-share aria-label="Share">${icon.share}</button>
+    <button class="icon-btn" type="button" data-sheet aria-haspopup="dialog" aria-label="Share and export">${icon.share}</button>
   </header>`;
 }
 
@@ -197,6 +209,15 @@ function viewCombo(id) {
     title: `No. ${pad(id)}`,
     prev: `#/c/${prevId}`,
     next: `#/c/${nextId}`,
+    palette: {
+      title: `No. ${pad(id)}`,
+      sub: `${COUNT_WORDS[n]} colors`,
+      name: `348 · No. ${pad(id)}`,
+      file: `348-no-${pad(id)}`,
+      heading: `No. ${pad(id)}`,
+      aside: `${COUNT_WORDS[n]} colors`,
+      colors: combo.colors,
+    },
     html: `<article class="view view-detail view-combo" data-swipe>
       ${detailBar({ back: '#/', title: `No. ${pad(id)}`, sub: `${COUNT_WORDS[n]} colors`, saveKey: `c:${id}`, saveLabel: 'combination' })}
       <div class="bands">
@@ -258,6 +279,15 @@ function viewColor(slug) {
     title: c.name,
     prev: `#/color/${prev.slug}`,
     next: `#/color/${next.slug}`,
+    palette: {
+      title: c.name,
+      sub: `No. ${pad(c.index + 1)}`,
+      name: `348 · ${c.name}`,
+      file: `348-${c.slug}`,
+      heading: `No. ${pad(c.index + 1)}`,
+      aside: `${ROMAN[c.swatch]} · ${CHAPTERS[c.swatch]}`,
+      colors: [c],
+    },
     html: `<article class="view view-detail view-color" data-swipe>
       ${detailBar({ back: '#/colors', title: `No. ${pad(c.index + 1)}`, sub: `${ROMAN[c.swatch]} · ${esc(CHAPTERS[c.swatch])}`, saveKey: `k:${c.slug}`, saveLabel: 'color' })}
       <div class="hero ${c.ink}" style="--swatch:${c.hex}">
@@ -355,6 +385,7 @@ function recordNavigation(key) {
 }
 
 function route() {
+  closeSheet();
   const key = currentKey();
   recordNavigation(key);
   if (current) scrollMemory.set(current.key, window.scrollY);
@@ -465,6 +496,157 @@ async function share() {
   copy(url, null, 'Link copied');
 }
 
+// ---------- Share and export sheet ----------
+
+let sheetJob = null;
+
+function canShareFiles() {
+  return touchFirst.matches && Boolean(navigator.canShare?.({ files: [new File([''], 'x.png', { type: 'image/png' })] }));
+}
+
+// An image preview fitted inside a 148 × 132 box, drawn later from the full-size canvas.
+function shot(kind, label, size, verb) {
+  const s = Math.min(148 / size.width, 132 / size.height);
+  const w = Math.round(size.width * s);
+  const h = Math.round(size.height * s);
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  return `<button class="shot" type="button" data-export="${kind}" aria-label="${verb} ${label.toLowerCase()}, ${size.width} by ${size.height} pixels">
+    <span class="shot-frame"><canvas data-thumb="${kind}" width="${Math.round(w * dpr)}" height="${Math.round(h * dpr)}" style="width:${w}px;height:${h}px"></canvas></span>
+    <span class="shot-name">${label}</span>
+    <span class="shot-size">${size.width} × ${size.height}</span>
+  </button>`;
+}
+
+function sheetRow(kind, lead, title, sub, trail) {
+  return `<li><button class="sheet-row" type="button" data-export="${kind}">
+    <span class="row-icon">${lead}</span>
+    <span class="row-text"><span class="row-title">${title}</span><span class="row-sub">${esc(sub)}</span></span>
+    <span class="row-act">${trail}</span>
+  </button></li>`;
+}
+
+function openSheet(p) {
+  if (!p) return;
+  const wall = wallpaperSize();
+  const verb = canShareFiles() ? 'Share' : 'Download';
+  sheet.innerHTML = `<div class="sheet-inner">
+    <header class="sheet-head">
+      <span class="sheet-strip" aria-hidden="true">${p.colors.map((c) => `<span style="background:${c.hex}"></span>`).join('')}</span>
+      <div class="sheet-heading"><h2 id="sheet-title"><span class="sr-only">Share and export </span>${esc(p.title)}</h2><span>${esc(p.sub)}</span></div>
+      <button class="icon-btn" type="button" data-close aria-label="Close">${icon.close}</button>
+    </header>
+    <h3 class="sheet-label">Share</h3>
+    <div class="shots">${shot('card', 'Story card', CARD, verb)}${shot('wallpaper', 'Wallpaper', wall, verb)}</div>
+    <ul class="sheet-list">
+      ${sheetRow('link', icon.link, 'Link', `${location.host}${location.pathname}${location.hash}`, navigator.share ? icon.share : icon.copy)}
+    </ul>
+    <h3 class="sheet-label">Export</h3>
+    <ul class="sheet-list">
+      ${sheetRow('css', icon.code, 'CSS custom properties', ':root variables', icon.copy)}
+      ${sheetRow('tailwind', icon.braces, 'Tailwind theme', '@theme colors for Tailwind v4', icon.copy)}
+      ${sheetRow('procreate', icon.brush, 'Procreate swatches', '.swatches palette', icon.download)}
+      ${sheetRow('ase', icon.swatch, 'Adobe swatches', '.ase for Illustrator, Photoshop, InDesign', icon.download)}
+    </ul>
+  </div>`;
+  sheet.showModal();
+
+  // Draw the images now, so a tap can open the share sheet right away: sharing needs a fresh tap.
+  const job = { palette: p };
+  sheetJob = job;
+  const wallCanvas = drawWallpaper(p, wall);
+  paintThumb('wallpaper', wallCanvas);
+  job.wallpaper = toPng(wallCanvas);
+  job.card = drawCard(p).then((canvas) => {
+    if (sheetJob === job) paintThumb('card', canvas);
+    return toPng(canvas);
+  });
+  // A failure is reported when the image is tapped.
+  job.card.catch(() => {});
+  job.wallpaper.catch(() => {});
+}
+
+function paintThumb(kind, source) {
+  const thumb = sheet.querySelector(`[data-thumb="${kind}"]`);
+  const ctx = thumb?.getContext('2d');
+  if (!ctx) return;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(source, 0, 0, thumb.width, thumb.height);
+}
+
+function closeSheet() {
+  if (sheet.open) sheet.close();
+}
+
+sheet.addEventListener('close', () => {
+  // The close event comes a moment after close(); leave the sheet alone if it has been opened again since.
+  if (sheet.open) return;
+  sheetJob = null;
+  sheet.replaceChildren();
+});
+
+function download(file) {
+  const url = URL.createObjectURL(file);
+  const a = Object.assign(document.createElement('a'), { href: url, download: file.name });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+// Hand a file to the system share sheet on phones and tablets (Save Image, Procreate, Instagram…), or download it.
+async function deliver(file, hex) {
+  if (touchFirst.matches && navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      closeSheet();
+      return;
+    } catch (err) {
+      // Closing the share sheet leaves ours open; anything else, like a tap that went stale, falls back to a download.
+      if (err.name === 'AbortError') return;
+    }
+  }
+  closeSheet();
+  download(file);
+  toast(`Downloaded ${file.name}`, hex);
+}
+
+async function runExport(button) {
+  const job = sheetJob;
+  if (!job || button.getAttribute('aria-busy') === 'true') return;
+  const p = job.palette;
+  const kind = button.dataset.export;
+  const hex = p.colors[0].hex;
+  const binary = { type: 'application/octet-stream' };
+
+  if (kind === 'link') {
+    closeSheet();
+    share();
+  } else if (kind === 'css') {
+    closeSheet();
+    copy(cssVariables(p), hex, 'Copied CSS custom properties');
+  } else if (kind === 'tailwind') {
+    closeSheet();
+    copy(tailwindTheme(p), hex, 'Copied Tailwind theme');
+  } else if (kind === 'procreate') {
+    deliver(new File([procreateSwatches(p)], `${p.file}.swatches`, binary), hex);
+  } else if (kind === 'ase') {
+    deliver(new File([adobeSwatches(p)], `${p.file}.ase`, binary), hex);
+  } else if (kind === 'card' || kind === 'wallpaper') {
+    button.setAttribute('aria-busy', 'true');
+    let blob;
+    try {
+      blob = await job[kind];
+    } catch {
+      closeSheet();
+      toast('Couldn’t make the image. Try again.');
+      return;
+    } finally {
+      button.removeAttribute('aria-busy');
+    }
+    await deliver(new File([blob], `${p.file}-${kind === 'card' ? 'story' : 'wallpaper'}.png`, { type: 'image/png' }), hex);
+  }
+}
+
 function applySearch() {
   const view = main.querySelector('.view-colors');
   if (!view) return;
@@ -489,7 +671,12 @@ function applySearch() {
 // ---------- Events ----------
 
 document.addEventListener('click', (e) => {
-  const el = e.target.closest('[data-copy], [data-save], [data-share], [data-filter], [data-random], [data-back], [data-dir], .tab');
+  // A modal dialog is its own target only when the tap lands on its backdrop.
+  if (e.target === sheet) {
+    closeSheet();
+    return;
+  }
+  const el = e.target.closest('[data-copy], [data-save], [data-sheet], [data-export], [data-close], [data-filter], [data-random], [data-back], [data-dir], .tab');
   if (!el) return;
   const ds = el.dataset;
 
@@ -497,8 +684,12 @@ document.addEventListener('click', (e) => {
     copy(ds.copy, ds.hex, ds.label);
   } else if (ds.save) {
     toggleSave(el);
-  } else if (ds.share !== undefined) {
-    share();
+  } else if (ds.sheet !== undefined) {
+    openSheet(current?.palette);
+  } else if (ds.export) {
+    runExport(el);
+  } else if (ds.close !== undefined) {
+    closeSheet();
   } else if (ds.filter) {
     store.filter = ds.filter;
     persist();
@@ -526,7 +717,7 @@ document.addEventListener('input', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if (!current?.detail || e.metaKey || e.ctrlKey || e.altKey || e.target.closest('input, textarea')) return;
+  if (!current?.detail || sheet.open || e.metaKey || e.ctrlKey || e.altKey || e.target.closest('input, textarea')) return;
   if (e.key === 'ArrowRight') go('next');
   else if (e.key === 'ArrowLeft') go('prev');
 });

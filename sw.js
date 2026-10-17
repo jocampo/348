@@ -2,7 +2,7 @@
 // Google Fonts are cache-first because their URLs never change.
 // Bump VERSION when the list of app files changes.
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const APP_CACHE = `348-app-${VERSION}`;
 const FONT_CACHE = '348-fonts';
 const APP_FILES = [
@@ -10,6 +10,7 @@ const APP_FILES = [
   'index.html',
   'styles.css',
   'app.js',
+  'export.js',
   'data/colors.json',
   'manifest.webmanifest',
   'icons/favicon.svg',
