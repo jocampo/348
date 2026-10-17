@@ -10,6 +10,8 @@ The share button on a combination or color opens a sheet with:
 
 Plain HTML, CSS and JavaScript with no build step. Any static host works (GitHub Pages, Netlify, Cloudflare Pages).
 
+Background, decisions made so far and architecture notes (for people and coding agents) are in [CLAUDE.md](CLAUDE.md).
+
 ## Run locally
 
 ```bash
