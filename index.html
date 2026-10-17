@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>348 · A homage to Sanzo Wada</title>
+  <meta name="description" content="A homage to Sanzo Wada. Browse, copy and save the 348 color combinations from his A Dictionary of Color Combinations. Installs on your phone and works offline.">
+  <meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="348">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body data-detail="false">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="#/" aria-label="348, a homage to Sanzo Wada. Home">
+      <span class="brand-mark">348</span>
+      <span class="brand-tag">A homage to Sanzo Wada</span>
+    </a>
+    <a class="icon-btn" href="#/about" aria-label="About">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>
+    </a>
+  </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <a class="tab" href="#/" data-tab="combos">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="5.5" height="14" rx="1"/><rect x="9.25" y="5" width="5.5" height="14" rx="1"/><rect x="15" y="5" width="5.5" height="14" rx="1"/></svg>
+      <span>Combinations</span>
+    </a>
+    <a class="tab" href="#/colors" data-tab="colors">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>
+      <span>Colors</span>
+    </a>
+    <a class="tab" href="#/saved" data-tab="saved">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/></svg>
+      <span>Saved</span>
+    </a>
+  </nav>
+
+  <main id="main" tabindex="-1">
+    <p class="loading">Loading colors…</p>
+  </main>
+
+  <div class="toast" role="status" aria-live="polite"></div>
+  <noscript><p class="loading">348 needs JavaScript to show the color combinations.</p></noscript>
+</body>
+</html>
